@@ -15,3 +15,18 @@ window.addEventListener("DOMContentLoaded", () => {
     .querySelector("#greet-button")
     .addEventListener("click", () => greet());
 });
+
+
+let configMsgEl;
+
+async function config() {
+  // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
+  configMsgEl.innerHTML = JSON.stringify(await invoke("get_config"));
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+  configMsgEl = document.querySelector("#config-msg");
+  document
+    .querySelector("#get-config")
+    .addEventListener("click", () => config());
+});
