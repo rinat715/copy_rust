@@ -19,6 +19,7 @@ const TIMESHEET_PATH: &str = "rest/com.deniz.jira.worklog/1.0/timesheet/user";
 pub enum ClientErr {
     ReqwestErr(reqwest::Error),
     ParseErr(ParseError),
+    HttpErr(HttpError),
 }
 
 impl Display for ClientErr {
@@ -26,8 +27,10 @@ impl Display for ClientErr {
         match self {
             ClientErr::ReqwestErr(reqwest_error) => 
                 write!(f, "{}", reqwest_error),
-                ClientErr::ParseErr(parse_error) => 
+            ClientErr::ParseErr(parse_error) => 
                 write!(f, "{}", parse_error),
+            ClientErr::HttpErr(http_error) =>
+                write!(f, "{}", http_error),
         }
     }
 }
@@ -45,6 +48,25 @@ impl From<reqwest::Error> for ClientErr {
         ClientErr::ReqwestErr(err)
     }
 }
+
+impl From<HttpError> for ClientErr {
+    fn from(err: HttpError) -> Self {
+        ClientErr::HttpErr(err)
+    }
+}
+
+#[derive(Debug)]
+pub struct HttpError {
+    status: reqwest::StatusCode,
+    text: String,
+}
+
+impl Display for HttpError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Http Error: status code {} response {}", self.status, self.text)
+    }
+}
+
 
 
 #[derive(Debug)]
@@ -82,41 +104,26 @@ struct Request {
 }
 
 impl Request {
-    fn new() -> Result<Request, reqwest::Error> {
+    fn headers() -> header::HeaderMap {
         let mut headers = header::HeaderMap::new();
         headers.insert("Accept", header::HeaderValue::from_static("application/json"));
         headers.insert("Content-Type", header::HeaderValue::from_static("application/json"));
-
+        return headers;
+    }
+    fn new() -> Result<Request, reqwest::Error> {
         let client = reqwest::Client::builder()
-        .default_headers(headers)
+        .default_headers(Request::headers())
         .build()?;
 
         Ok(Request { client: client })
     }
-    async fn get_worklogs(&self, url: &str, username: &str, password: &str) -> Result<WorklogResponse, reqwest::Error> {
+    async fn get(&self, url: &str, username: &str, password: &str) -> Result<reqwest::Response, reqwest::Error> {
         let resp = self.client.get(url)
         .basic_auth(username, Some(password))
         .send()
         .await?;
-        // TODO чекать http status
-
         eprintln!("Response: {:?} {}", resp.version(), resp.status());
-    
-        Ok(resp.json::<WorklogResponse>().await?)
-
-    }
-
-    async fn get_issue_by_key(&self, url: &str, username: &str, password: &str) -> Result<WorklogResponse, reqwest::Error> {
-        let resp = self.client.get(url)
-        .basic_auth(username, Some(password))
-        .send()
-        .await?;
-        // TODO чекать http status
-
-        eprintln!("Response: {:?} {}", resp.version(), resp.status());
-    
-        Ok(resp.json::<WorklogResponse>().await?)
-
+        Ok(resp)
     }
 
     
@@ -148,11 +155,20 @@ impl<'a> Client<'a> {
 
     pub async fn get_worklogs(&self, start_date: &str, end_date: &str) -> Result<WorklogResponse, ClientErr> {
         let request_url = self.url.worklog_by_dates(start_date, end_date, &self.username)?;
-        Ok(self.client.get_worklogs(request_url.as_str(), &self.username, &self.password).await?)
+        let resp = self.client.get(request_url.as_str(), &self.username, &self.password).await?;
+        let status = resp.status();
+        if status.is_success() { // TODO переписать бы это на макрос или еще как то 
+            Ok(resp.json::<WorklogResponse>().await?)
+        } else {
+            let text = resp.text().await?;
+            Err(ClientErr::HttpErr(HttpError {status, text}))
+        }
+
+        
     }
 
-    pub async fn get_issue_by_key(&self, key: &str) -> Result<WorklogResponse, ClientErr> {
-        let request_url = self.url.issue_by_key(key)?;
-        Ok(self.client.get_issue_by_key(request_url.as_str(), &self.username, &self.password).await?)
-    }
+    // pub async fn get_issue_by_key(&self, key: &str) -> Result<WorklogResponse, ClientErr> {
+    //     let request_url = self.url.issue_by_key(key)?;
+    //     Ok(self.client.get_issue_by_key(request_url.as_str(), &self.username, &self.password).await?)
+    // }
 }
