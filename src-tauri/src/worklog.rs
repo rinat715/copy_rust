@@ -34,6 +34,7 @@ struct WorkLog {
     id: u64,
     work_start: u64,
     time_spent: u16,
+    comment: String,
     work_log_attributes: Vec<WorkLogAttribute>,
 }
 
