@@ -15,6 +15,24 @@ const WORKLOG_PATH: &str = "rest/com.deniz.jira.worklog/1.0/worklog";
 const TIMESHEET_PATH: &str = "rest/com.deniz.jira.worklog/1.0/timesheet/user";
 
 
+// a  - reqwest::Response
+// b - struct 
+macro_rules! parse_response {
+    ($a:expr, $b:ty) => {
+        {   
+            let status = $a.status();
+            if status.is_success() {
+                Ok($a.json::<$b>().await?)
+            } else {
+                let text = $a.text().await?;
+                return Err(ClientErr::HttpErr(HttpError {status, text}));
+            }
+            
+         }
+     };
+}
+
+
 #[derive(Debug)]
 pub enum ClientErr {
     ReqwestErr(reqwest::Error),
@@ -60,6 +78,7 @@ pub struct HttpError {
     status: reqwest::StatusCode,
     text: String,
 }
+impl Error for HttpError {}
 
 impl Display for HttpError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -156,15 +175,7 @@ impl<'a> Client<'a> {
     pub async fn get_worklogs(&self, start_date: &str, end_date: &str) -> Result<WorklogResponse, ClientErr> {
         let request_url = self.url.worklog_by_dates(start_date, end_date, &self.username)?;
         let resp = self.client.get(request_url.as_str(), &self.username, &self.password).await?;
-        let status = resp.status();
-        if status.is_success() { // TODO переписать бы это на макрос или еще как то 
-            Ok(resp.json::<WorklogResponse>().await?)
-        } else {
-            let text = resp.text().await?;
-            Err(ClientErr::HttpErr(HttpError {status, text}))
-        }
-
-        
+        parse_response!(resp, WorklogResponse)
     }
 
     // pub async fn get_issue_by_key(&self, key: &str) -> Result<WorklogResponse, ClientErr> {
@@ -172,3 +183,5 @@ impl<'a> Client<'a> {
     //     Ok(self.client.get_issue_by_key(request_url.as_str(), &self.username, &self.password).await?)
     // }
 }
+
+

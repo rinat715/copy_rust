@@ -36,7 +36,8 @@ fn get_config(state: tauri::State<App>) -> &Config {
 
 
 #[tauri::command]
-// Arguments should be passed as a JSON object with camelCase keys:
+// Arguments should be passed as a JSON object with camelCase keys
+// js: let res = await invoke("get_worklogs", { startDate: "2023-01-16", endDate: "2023-01-17" })
 async fn get_worklogs(state: tauri::State<'_, App>, start_date: &str, end_date: &str) -> Result<WorklogResponse, ErrorMessage> {
     let vendor = state.inner().config.get_vendor();
     let client = match Client::build(vendor){
