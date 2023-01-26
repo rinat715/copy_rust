@@ -2,6 +2,7 @@ use std::error::Error;
 use std::fmt::Display;
 use url::{Url, ParseError};
 use reqwest::header;
+use serde::ser::{Serialize, Serializer};
 
 pub mod config;
 pub mod issue;
@@ -70,6 +71,15 @@ impl From<reqwest::Error> for ClientErr {
 impl From<HttpError> for ClientErr {
     fn from(err: HttpError) -> Self {
         ClientErr::HttpErr(err)
+    }
+}
+
+impl Serialize for ClientErr {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_str(&format!("{}", self) )
     }
 }
 
