@@ -1,8 +1,10 @@
 <script>
-  import Greet from "$lib/Greet.svelte";
-  import Shell from "$lib/shell.svelte";
+    import { Tabs } from '@svelteuidev/core';
+    import { Camera, Gear } from 'radix-icons-svelte';
+    import Worklogs from './worklogs.svelte';
 </script>
 
-<h1>Welcome to Tauri!</h1>
-
-<Shell />
+<Tabs color="lime">
+    <Tabs.Tab label='Worklogs' icon={Camera}><Worklogs/></Tabs.Tab>
+    <Tabs.Tab label='Settings' icon={Gear}>Settings tab content</Tabs.Tab>
+</Tabs>

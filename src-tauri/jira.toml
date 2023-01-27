@@ -1,0 +1,93 @@
+# Диапазон дат для выгрузки ворклогов. Формат записи: ISO 8601 format 'YYYY-MM-DD'
+start_date = '2022-12-19'
+end_date = '2022-12-26'
+
+file = 'issues.json'
+
+# Настройки Jira Simbirsoft
+[vendor]
+url = 'https://jira.simbirsoft.com'
+login = 'rinat.shaihetdinov'
+password = 'j598zOBi'
+
+issue_type = 'Back'
+project_key = 'BOTCH'
+# Например, SS_ISSUE_COMPONENTS = ['ИМ', 'Автотест']
+#issue_components = ['тест_компонент']
+issue_components = []
+
+# Номер направления
+# Example:
+# "Unbillable": 67,
+# "Presales coach Frontend": 66,
+# "Performance Engineer": 65,
+# "Other": 64,
+# "Administrators": 63,
+# "Support": 61,
+# "Финансовое направление": 60,
+# "Топ-менеджмент": 59,
+# "Руководитель отдела": 58,
+# "Руководитель Направления": 57,
+# "Кадры": 56,
+# "Группа развития и мотивации": 55,
+# "Группа подбора и адаптации": 54,
+# "Unbillable Desktop-разработчик": 53,
+# "IT Support": 52,
+# "Internal Products": 51,
+# "Developers": 50,
+# "Business Solutions": 49,
+# "Lawyer": 48,
+# "Оценщик": 47,
+# "UX-дизайнер": 46,
+# "Оператор SD": 45,
+# "Архитектор": 44,
+# "Sales": 43,
+# "Business Support": 42,
+# "Office Support": 41,
+# "HR": 40,
+# "Event менеджер": 39,
+# "Руководитель СК": 38,
+# "Эксперт СК": 37,
+# "Стажировка": 36,
+# "PR специалист": 35,
+# "Внешний разработчик": 33,
+# "Внешний пользователь [Все права]": 32,
+# "Внешний пользователь [allow Issues]": 31,
+# "Гость": 30,
+# "Web-разработчик": 29,
+# "Unbillable Web-разработчик": 28,
+# "Unbillable Team Lead": 27,
+# "Unbillable SDET": 26,
+# "Unbillable Дизайнер": 25,
+# "Unbillable Аналитик": 24,
+# "Unbillable QA Lead": 23,
+# "Unbillable QA": 22,
+# "Unbillable PM": 21,
+# "Unbillable Mobile-разработчик": 20,
+# "Unbillable iOS": 19,
+# "Unbillable Frontend": 18,
+# "Unbillable DevOps": 17,
+# "Unbillable Backend": 16,
+# "Unbillable Android": 15,
+# "Team Lead": 14,
+# "Design": 13,
+# "Mobile-разработчик": 12,
+# "iOS": 11,
+# "Android": 10,
+# "DevOps": 9,
+# "SDET": 8,
+# "Аккаунт": 7,
+# "Аналитик": 6,
+# "PM": 5,
+# "Backend": 4,
+# "Frontend": 3,
+# "QA Lead": 2,
+# "QA": 1,
+direction = 4
+
+[customer]
+url = 'http://jira-test.simbirsoft:8080'
+login = 'rinat.shaihetdinov'
+password = 'j598zOBi'
+# Задачи, ворклоги которых не нужно копировать. Например, ISSUES_IGNORE_LIST = ["ATGSM-14317", "ATGSM-14318"]
+issues_ignore_list = []
